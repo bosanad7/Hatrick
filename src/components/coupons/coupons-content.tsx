@@ -10,7 +10,7 @@ import { Plus, Tag, Percent, DollarSign } from "lucide-react";
 interface CouponData {
   id: string;
   code: string;
-  type: "PERCENTAGE" | "FIXED_AMOUNT";
+  type: "PERCENTAGE" | "FIXED";
   value: number;
   isActive: boolean;
   usedCount: number;
