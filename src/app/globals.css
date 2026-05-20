@@ -1,26 +1,395 @@
 @import "tailwindcss";
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HATTRICK BRAND DESIGN SYSTEM — MONOCHROME EDITION
+   Black & White premium SaaS aesthetic
+   Primary: #000000 (Pure Black)
+   Accent: #ffffff (Pure White)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ── Dark Mode (Default) ────────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand — monochrome */
+  --brand-black:    #0a0a0a;
+  --brand-white:    #ffffff;
+  --brand-accent:   #ffffff;
+  --brand-accent-mid: #e0e0e0;
+  --brand-accent-dim: #aaaaaa;
+
+  /* Surface */
+  --background:        #000000;
+  --surface:           #0a0a0a;
+  --card:              #111111;
+  --card-foreground:   #ffffff;
+  --popover:           #111111;
+  --popover-foreground:#ffffff;
+
+  /* Text */
+  --foreground:        #ffffff;
+  --muted-foreground:  #777777;
+
+  /* Interactive */
+  --primary:           #ffffff;
+  --primary-foreground:#000000;
+  --secondary:         #1a1a1a;
+  --secondary-foreground: #cccccc;
+  --muted:             #1a1a1a;
+  --accent:            rgba(255,255,255,0.08);
+  --accent-foreground: #ffffff;
+
+  /* Status */
+  --destructive:       #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* Borders & inputs */
+  --border:  rgba(255,255,255,0.08);
+  --input:   rgba(255,255,255,0.06);
+  --ring:    #ffffff;
+  --radius:  0.5rem;
+
+  /* Sidebar */
+  --sidebar-bg:              #000000;
+  --sidebar-border:          rgba(255,255,255,0.06);
+  --sidebar-item-active-bg:  rgba(255,255,255,0.1);
+  --sidebar-item-active-text:#ffffff;
+  --sidebar-item-text:       #555555;
+  --sidebar-active-dot:      #ffffff;
+
+  /* Charts — grayscale ramp */
+  --chart-1: #ffffff;
+  --chart-2: #cccccc;
+  --chart-3: #999999;
+  --chart-4: #666666;
+  --chart-5: #444444;
+
+  /* Utility */
+  --track-bg: rgba(255,255,255,0.06);
+
+  /* Badge variables (dark) */
+  --badge-default-bg:      rgba(255,255,255,0.1);
+  --badge-default-text:    #ffffff;
+  --badge-secondary-bg:    rgba(255,255,255,0.06);
+  --badge-secondary-text:  #888888;
+  --badge-destructive-bg:  rgba(239,68,68,0.15);
+  --badge-destructive-text:#f87171;
+  --badge-warning-bg:      rgba(245,158,11,0.15);
+  --badge-warning-text:    #fbbf24;
+  --badge-outline-border:  rgba(255,255,255,0.15);
+  --badge-outline-text:    #aaaaaa;
+
+  /* Gradients */
+  --gradient-brand:    linear-gradient(135deg, #222222 0%, #000000 100%);
+  --gradient-dark:     linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
+  --gradient-surface:  linear-gradient(160deg, #0a0a0a 0%, #000000 100%);
 }
 
+/* ── Light Mode ─────────────────────────────────────────────────────────── */
+.light {
+  /* Surfaces */
+  --background:        #f5f5f5;
+  --surface:           #ffffff;
+  --card:              #ffffff;
+  --card-foreground:   #0a0a0a;
+  --popover:           #ffffff;
+  --popover-foreground:#0a0a0a;
+
+  /* Text */
+  --foreground:        #0a0a0a;
+  --muted-foreground:  #666666;
+
+  /* Interactive */
+  --primary:           #000000;
+  --primary-foreground:#ffffff;
+  --secondary:         #f0f0f0;
+  --secondary-foreground:#333333;
+  --muted:             #f0f0f0;
+  --accent:            rgba(0,0,0,0.04);
+  --accent-foreground: #000000;
+
+  /* Borders & inputs */
+  --border:  rgba(0,0,0,0.1);
+  --input:   rgba(0,0,0,0.06);
+  --ring:    #000000;
+
+  /* Utility */
+  --track-bg: rgba(0,0,0,0.06);
+
+  /* Sidebar stays black */
+  --sidebar-bg:              #000000;
+  --sidebar-border:          rgba(255,255,255,0.06);
+  --sidebar-item-active-bg:  rgba(255,255,255,0.1);
+  --sidebar-item-active-text:#ffffff;
+  --sidebar-item-text:       #555555;
+  --sidebar-active-dot:      #ffffff;
+
+  /* Badge variables (light) */
+  --badge-default-bg:      rgba(0,0,0,0.08);
+  --badge-default-text:    #000000;
+  --badge-secondary-bg:    rgba(0,0,0,0.04);
+  --badge-secondary-text:  #666666;
+  --badge-destructive-bg:  rgba(220,38,38,0.1);
+  --badge-destructive-text:#dc2626;
+  --badge-warning-bg:      rgba(180,120,0,0.1);
+  --badge-warning-text:    #b45309;
+  --badge-outline-border:  rgba(0,0,0,0.15);
+  --badge-outline-text:    #666666;
+
+  --gradient-brand:   linear-gradient(135deg, #e0e0e0 0%, #ffffff 100%);
+  --gradient-surface: linear-gradient(160deg, #f5f5f5 0%, #ffffff 100%);
+}
+
+/* ── Tailwind v4 Theme Bridge ────────────────────────────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background:          var(--background);
+  --color-foreground:          var(--foreground);
+  --color-card:                var(--card);
+  --color-card-foreground:     var(--card-foreground);
+  --color-popover:             var(--popover);
+  --color-popover-foreground:  var(--popover-foreground);
+  --color-primary:             var(--primary);
+  --color-primary-foreground:  var(--primary-foreground);
+  --color-secondary:           var(--secondary);
+  --color-secondary-foreground:var(--secondary-foreground);
+  --color-muted:               var(--muted);
+  --color-muted-foreground:    var(--muted-foreground);
+  --color-accent:              var(--accent);
+  --color-accent-foreground:   var(--accent-foreground);
+  --color-destructive:         var(--destructive);
+  --color-border:              var(--border);
+  --color-input:               var(--input);
+  --color-ring:                var(--ring);
+  --font-sans:                 var(--font-geist-sans);
+  --font-mono:                 var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ── Base ────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { border-color: var(--border); box-sizing: border-box; }
+
+html { color-scheme: dark; }
+html.light { color-scheme: light; }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Arabic font stack — applied when lang=ar */
+html[lang="ar"] body {
+  font-family: "IBM Plex Sans Arabic", "Noto Sans Arabic", "Segoe UI", "Tahoma", sans-serif;
+  letter-spacing: 0;
+}
+
+/* ── RTL Utilities ──────────────────────────────────────────────────────── */
+
+/* Flip flex direction for RTL layouts */
+html[dir="rtl"] .rtl\:flex-row-reverse { flex-direction: row-reverse; }
+html[dir="rtl"] .rtl\:space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+/* RTL text alignment */
+html[dir="rtl"] .rtl\:text-right { text-align: right; }
+html[dir="rtl"] .rtl\:text-left  { text-align: left; }
+
+/* RTL margin/padding flips */
+html[dir="rtl"] .rtl\:mr-0  { margin-right: 0; }
+html[dir="rtl"] .rtl\:ml-auto { margin-left: auto; }
+html[dir="rtl"] .rtl\:mr-auto { margin-right: auto; }
+
+/* RTL icon mirror for directional icons */
+html[dir="rtl"] .rtl\:rotate-180 { transform: rotate(180deg); }
+html[dir="rtl"] .rtl\:scale-x-flip { transform: scaleX(-1); }
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+/* ── Selection ───────────────────────────────────────────────────────────── */
+::selection { background: rgba(255,255,255,0.2); color: #fff; }
+.light ::selection { background: rgba(0,0,0,0.15); color: #000; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HATTRICK COMPONENT UTILITIES
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Hattrick logo filter — make black logo white on dark/black BG */
+.logo-invert { filter: invert(1); }
+.logo-normal { filter: none; }
+
+/* Brand gradient text — monochrome */
+.brand-gradient-text {
+  background: linear-gradient(135deg, #ffffff 0%, #888888 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card with top-border accent */
+.card-brand {
+  border-top: 2px solid rgba(255,255,255,0.2);
+  box-shadow: 0 0 0 0 transparent, 0 4px 24px rgba(0,0,0,0.4);
+  transition: box-shadow 0.2s;
+}
+.card-brand:hover {
+  box-shadow: 0 0 20px rgba(255,255,255,0.05), 0 4px 24px rgba(0,0,0,0.5);
+}
+
+/* Active sidebar indicator — RTL-aware */
+.nav-active-bar::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 2px; height: 55%;
+  border-radius: 0 2px 2px 0;
+  background: #ffffff;
+}
+html[dir="rtl"] .nav-active-bar::before {
+  left: auto;
+  right: 0;
+  border-radius: 2px 0 0 2px;
+}
+
+/* Hattrick CTA button — monochrome */
+.btn-brand {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn-brand:hover  { background: #e0e0e0; }
+.btn-brand:active { transform: scale(0.98); }
+
+/* Hattrick ghost button */
+.btn-ghost-brand {
+  background: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s, background 0.2s;
+}
+.btn-ghost-brand:hover {
+  border-color: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.04);
+}
+
+/* Status badge colours — monochrome base */
+.badge-active    { background: rgba(255,255,255,0.1);  color: #ffffff; }
+.badge-inactive  { background: rgba(136,136,136,0.15); color: #888; }
+.badge-waitlist  { background: rgba(234,179,8,0.15);  color: #ca8a04; }
+.badge-suspended { background: rgba(239,68,68,0.15);  color: #ef4444; }
+.badge-paid      { background: rgba(255,255,255,0.1);  color: #ffffff; }
+.badge-pending   { background: rgba(234,179,8,0.15);  color: #ca8a04; }
+.badge-overdue   { background: rgba(239,68,68,0.15);  color: #ef4444; }
+
+/* Stat card glow variants — monochrome */
+.glow-white  { box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset, 0 8px 32px rgba(0,0,0,0.4); }
+.glow-accent { box-shadow: 0 0 0 1px rgba(255,255,255,0.12) inset, 0 8px 32px rgba(0,0,0,0.3); }
+
+/* Glass surface */
+.glass {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.light .glass {
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+/* ── Light mode component overrides ─────────────────────────────────────── */
+
+/* Table row hover */
+.light tr.hover\:bg-\[rgba\(255\,255\,255\,0\.02\)\]:hover td {
+  background: rgba(0,0,0,0.02);
+}
+
+/* Card brand in light */
+.light .card-brand {
+  border-top-color: rgba(0,0,0,0.15);
+  box-shadow: 0 0 0 0 transparent, 0 2px 12px rgba(0,0,0,0.06);
+}
+.light .card-brand:hover {
+  box-shadow: 0 0 20px rgba(0,0,0,0.06), 0 2px 12px rgba(0,0,0,0.08);
+}
+
+/* Status badge colours in light mode */
+.light .badge-active    { background: rgba(0,0,0,0.08);  color: #000000; }
+.light .badge-inactive  { background: rgba(90,90,90,0.08);  color: #666666; }
+.light .badge-waitlist  { background: rgba(180,120,0,0.1);   color: #b45309; }
+.light .badge-suspended { background: rgba(220,38,38,0.1);   color: #dc2626; }
+.light .badge-paid      { background: rgba(0,0,0,0.08);  color: #000000; }
+.light .badge-pending   { background: rgba(180,120,0,0.1);   color: #b45309; }
+.light .badge-overdue   { background: rgba(220,38,38,0.1);   color: #dc2626; }
+
+/* Recharts tooltip in light */
+.light .recharts-tooltip-wrapper .tooltip {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.1);
+  color: #0a0a0a;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+/* Light mode ghost button */
+.light .btn-ghost-brand:hover {
+  border-color: rgba(0,0,0,0.2);
+  background: rgba(0,0,0,0.03);
+}
+
+/* Light mode CTA button */
+.light .btn-brand {
+  background: #000000;
+  color: #ffffff;
+}
+.light .btn-brand:hover { background: #222222; }
+
+/* Shimmer skeleton */
+@keyframes shimmer {
+  0%   { background-position: -400% 0; }
+  100% { background-position:  400% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 37%,
+    rgba(255,255,255,0.04) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.6s ease infinite;
+}
+
+/* Grid overlay (used on login bg) */
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Noise texture on cards */
+.noise::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; border-radius: inherit;
+}
+
+/* Recharts tooltip */
+.recharts-tooltip-wrapper .tooltip {
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+@media print {
+  .no-print { display: none !important; }
 }

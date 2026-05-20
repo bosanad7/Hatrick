@@ -1,0 +1,748 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  MANAGER
+  COACH
+  PARENT
+  CALL_CENTER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role      @default(PARENT)
+  phone         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  coach         Coach?
+  parent        Parent?
+  notifications Notification[]
+  ticketsCreated  Ticket[]       @relation("TicketCreator")
+  ticketsAssigned Ticket[]       @relation("TicketAssignee")
+  ticketReplies   TicketReply[]
+  auditLogs       AuditLog[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Academy Core ─────────────────────────────────────────────────────────────
+
+enum AgeGroup {
+  U5
+  U7
+  U9
+  U11
+  U13
+  U15
+}
+
+enum PlayerStatus {
+  ACTIVE
+  INACTIVE
+  WAITLIST
+  SUSPENDED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum PlayerType {
+  OUTFIELD
+  GOALKEEPER
+}
+
+model Parent {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  nationalId        String?
+  relationship      String?   @default("Parent")
+  address           String?
+  phone             String?
+  preferredLanguage String    @default("en")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  players       Player[]
+  payments      Payment[]
+  subscriptions Subscription[]
+  orders        Order[]
+  invoices      Invoice[]
+  tickets       Ticket[]
+}
+
+model Player {
+  id                   String       @id @default(cuid())
+  firstName            String
+  lastName             String
+  dateOfBirth          DateTime
+  gender               Gender       @default(MALE)
+  ageGroup             AgeGroup
+  playerType           PlayerType   @default(OUTFIELD)
+  nationality          String?
+  photo                String?
+  status               PlayerStatus @default(ACTIVE)
+  position             String?
+  jerseyNumber         Int?
+  medicalNotes         String?
+  // Civil ID fields
+  civilIdNumber        String?
+  civilIdImage         String?
+  bloodType            String?
+  // Clothing
+  clothingSize         String?
+  preferredShirtName   String?
+  preferredShirtNumber Int?
+  // Trial tracking
+  hasPreviousTrial     Boolean      @default(false)
+  // Admin override for category
+  ageGroupOverride     Boolean      @default(false)
+  ageGroupOverrideNote String?
+
+  parentId         String
+  enrollmentDate   DateTime     @default(now())
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  parent         Parent              @relation(fields: [parentId], references: [id])
+  attendances    Attendance[]
+  payments       Payment[]
+  assessments    Assessment[]
+  groupPlayers   GroupPlayer[]
+  subscriptions  Subscription[]
+  evaluations    Evaluation[]
+  postponements  SessionPostponement[]
+  playerCards    PlayerCard[]
+  bestPlayerAwards BestPlayerOfMonth[]
+}
+
+// ─── Coaches & Staff ──────────────────────────────────────────────────────────
+
+enum CoachRole {
+  HEAD_COACH
+  ASSISTANT_COACH
+  GOALKEEPER_COACH
+  FITNESS_COACH
+}
+
+model Coach {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  bio         String?
+  speciality  String?
+  coachRole   CoachRole @default(ASSISTANT_COACH)
+  licenseNo   String?
+  hireDate    DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions    TrainingSession[]
+  assessments Assessment[]
+  evaluations Evaluation[]
+}
+
+// ─── Groups & Sessions ────────────────────────────────────────────────────────
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  ageGroup    AgeGroup
+  maxCapacity Int      @default(20)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  groupPlayers GroupPlayer[]
+  sessions     TrainingSession[]
+}
+
+model GroupPlayer {
+  id        String   @id @default(cuid())
+  groupId   String
+  playerId  String
+  joinedAt  DateTime @default(now())
+
+  group  Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, playerId])
+}
+
+enum PitchName {
+  PITCH_1
+  PITCH_2
+  PITCH_3
+  PITCH_4
+  PITCH_5A
+  PITCH_5B
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model TrainingSession {
+  id          String        @id @default(cuid())
+  title       String
+  groupId     String
+  coachId     String
+  pitch       PitchName
+  startTime   DateTime
+  endTime     DateTime
+  status      SessionStatus @default(SCHEDULED)
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  group         Group              @relation(fields: [groupId], references: [id])
+  coach         Coach              @relation(fields: [coachId], references: [id])
+  attendances   Attendance[]
+  evaluations   Evaluation[]
+  postponements SessionPostponement[]
+}
+
+// ─── Attendance ───────────────────────────────────────────────────────────────
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  sessionId String
+  playerId  String
+  status    AttendanceStatus @default(PRESENT)
+  note      String?
+  createdAt DateTime         @default(now())
+
+  session TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  player  Player          @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, playerId])
+}
+
+// ─── Assessments (legacy — kept for backward compat) ─────────────────────────
+
+model Assessment {
+  id          String   @id @default(cuid())
+  playerId    String
+  coachId     String
+  date        DateTime @default(now())
+  technical   Int      // 1-10
+  physical    Int      // 1-10
+  tactical    Int      // 1-10
+  attitude    Int      // 1-10
+  // Extended FIFA-card stats
+  speed       Int?
+  shooting    Int?
+  passing     Int?
+  dribbling   Int?
+  defense     Int?
+  discipline  Int?
+  fitness     Int?
+  teamwork    Int?
+  // GK-specific stats
+  gkDiving      Int?
+  gkHandling    Int?
+  gkKicking     Int?
+  gkReflexes    Int?
+  gkPositioning Int?
+  recommendation String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  coach  Coach  @relation(fields: [coachId], references: [id])
+}
+
+// ─── Evaluations (post-session coach evaluations) ─────────────────────────────
+
+model Evaluation {
+  id          String           @id @default(cuid())
+  playerId    String
+  coachId     String
+  sessionId   String?
+  attendance  AttendanceStatus @default(PRESENT)
+  discipline  Int              // 1-10
+  technical   Int              // 1-10
+  tactical    Int              // 1-10
+  fitness     Int              // 1-10
+  teamwork    Int              // 1-10
+  notes       String?
+  recommendation String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  player  Player           @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  coach   Coach            @relation(fields: [coachId], references: [id])
+  session TrainingSession? @relation(fields: [sessionId], references: [id])
+}
+
+// ─── Player Cards (FIFA-style) ────────────────────────────────────────────────
+
+model PlayerCard {
+  id            String   @id @default(cuid())
+  playerId      String
+  overallRating Int
+  speed         Int
+  shooting      Int
+  passing       Int
+  dribbling     Int
+  defense       Int
+  physical      Int
+  // GK-specific
+  gkDiving      Int?
+  gkHandling    Int?
+  gkKicking     Int?
+  gkReflexes    Int?
+  gkPositioning Int?
+  generatedAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+// ─── Best Player of the Month ─────────────────────────────────────────────────
+
+model BestPlayerOfMonth {
+  id        String   @id @default(cuid())
+  playerId  String
+  month     Int
+  year      Int
+  category  String   // e.g. "Best Attacker", "Best Defender", "MVP"
+  reason    String?
+  createdAt DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, month, year, category])
+}
+
+// ─── Subscriptions ────────────────────────────────────────────────────────────
+
+enum SubscriptionType {
+  NEW_MEMBERSHIP
+  RENEWAL
+  SINGLE_SESSION
+  TRIAL_SESSION
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  FROZEN
+  CANCELLED
+}
+
+model Subscription {
+  id                 String             @id @default(cuid())
+  playerId           String
+  parentId           String
+  type               SubscriptionType
+  status             SubscriptionStatus @default(ACTIVE)
+  startDate          DateTime
+  endDate            DateTime
+  totalSessions      Int?
+  usedSessions       Int                @default(0)
+  maxPostponements   Int                @default(3)
+  usedPostponements  Int                @default(0)
+  amount             Float
+  discount           Float              @default(0)
+  couponId           String?
+  loyaltyBenefitApplied Boolean         @default(false)
+  paymentId          String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  player        Player              @relation(fields: [playerId], references: [id])
+  parent        Parent              @relation(fields: [parentId], references: [id])
+  coupon        Coupon?             @relation(fields: [couponId], references: [id])
+  postponements SessionPostponement[]
+  invoices      Invoice[]
+}
+
+// ─── Coupons ──────────────────────────────────────────────────────────────────
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
+}
+
+model Coupon {
+  id         String     @id @default(cuid())
+  code       String     @unique
+  type       CouponType
+  value      Float
+  maxUses    Int?
+  usedCount  Int        @default(0)
+  minPlayers Int        @default(1)
+  validFrom  DateTime
+  validUntil DateTime
+  isActive   Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  subscriptions Subscription[]
+}
+
+// ─── Session Postponements ────────────────────────────────────────────────────
+
+enum PostponementStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model SessionPostponement {
+  id             String             @id @default(cuid())
+  playerId       String
+  sessionId      String
+  subscriptionId String?
+  status         PostponementStatus @default(PENDING)
+  reason         String?
+  requestedAt    DateTime           @default(now())
+  reviewedAt     DateTime?
+  reviewedBy     String?
+  createdAt      DateTime           @default(now())
+
+  player       Player           @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  session      TrainingSession  @relation(fields: [sessionId], references: [id])
+  subscription Subscription?    @relation(fields: [subscriptionId], references: [id])
+}
+
+// ─── Merchandise & Orders ─────────────────────────────────────────────────────
+
+enum MerchandiseCategory {
+  CLOTHING
+  SOCKS
+  EQUIPMENT
+  OTHER
+}
+
+model Merchandise {
+  id          String              @id @default(cuid())
+  name        String
+  description String?
+  category    MerchandiseCategory
+  price       Float
+  stock       Int                 @default(0)
+  image       String?
+  sizes       String?             // Comma-separated: "S,M,L,XL"
+  isActive    Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  orderItems OrderItem[]
+}
+
+model Order {
+  id          String    @id @default(cuid())
+  parentId    String
+  totalAmount Float
+  status      String    @default("PENDING") // PENDING, PAID, CANCELLED
+  paymentId   String?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  parent   Parent      @relation(fields: [parentId], references: [id])
+  items    OrderItem[]
+  invoices Invoice[]
+}
+
+model OrderItem {
+  id             String  @id @default(cuid())
+  orderId        String
+  merchandiseId  String?
+  subscriptionId String?
+  quantity       Int     @default(1)
+  unitPrice      Float
+  itemType       String  // "SUBSCRIPTION", "MERCHANDISE", "SESSION"
+  size           String?
+  shirtName      String?
+  shirtNumber    Int?
+  createdAt      DateTime @default(now())
+
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  merchandise Merchandise? @relation(fields: [merchandiseId], references: [id])
+}
+
+// ─── Invoices ─────────────────────────────────────────────────────────────────
+
+model Invoice {
+  id              String    @id @default(cuid())
+  parentId        String
+  orderId         String?
+  subscriptionId  String?
+  paymentId       String?
+  invoiceNumber   String    @unique
+  totalAmount     Float
+  discount        Float     @default(0)
+  taxAmount       Float     @default(0)
+  status          String    @default("DRAFT") // DRAFT, ISSUED, PAID, VOID
+  issuedAt        DateTime  @default(now())
+  dueDate         DateTime?
+  paidAt          DateTime?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  parent       Parent        @relation(fields: [parentId], references: [id])
+  order        Order?        @relation(fields: [orderId], references: [id])
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+}
+
+// ─── Financials ───────────────────────────────────────────────────────────────
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentType {
+  REGISTRATION
+  MONTHLY
+  TERM
+  ANNUAL
+  EVENT
+  RENTAL
+  SUBSCRIPTION
+  MERCHANDISE
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  parentId    String
+  playerId    String?
+  type        PaymentType
+  amount      Float
+  currency    String        @default("KWD")
+  status      PaymentStatus @default(PENDING)
+  dueDate     DateTime
+  paidAt      DateTime?
+  reference   String?
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  parent Parent  @relation(fields: [parentId], references: [id])
+  player Player? @relation(fields: [playerId], references: [id])
+}
+
+// ─── Pitch Bookings ───────────────────────────────────────────────────────────
+
+enum BookingType {
+  TRAINING
+  RENTAL
+  BIRTHDAY
+  EVENT
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model PitchBooking {
+  id          String        @id @default(cuid())
+  pitch       PitchName
+  type        BookingType   @default(RENTAL)
+  bookedBy    String
+  startTime   DateTime
+  endTime     DateTime
+  status      BookingStatus @default(PENDING)
+  totalAmount Float?
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+// ─── Announcements ────────────────────────────────────────────────────────────
+
+enum AudienceTarget {
+  ALL
+  PARENTS
+  COACHES
+  ADMINS
+  CALL_CENTER_STAFF
+}
+
+model Announcement {
+  id        String         @id @default(cuid())
+  title     String
+  body      String
+  target    AudienceTarget @default(ALL)
+  pinned    Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+// ─── Support Tickets ──────────────────────────────────────────────────────────
+
+enum TicketCategory {
+  SUGGESTION
+  COMPLAINT
+  QUESTION
+  HELP
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  ESCALATED
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Ticket {
+  id           String         @id @default(cuid())
+  userId       String
+  parentId     String?
+  category     TicketCategory
+  priority     TicketPriority @default(MEDIUM)
+  subject      String
+  body         String
+  status       TicketStatus   @default(OPEN)
+  assignedToId String?
+  resolvedAt   DateTime?
+  aiAttempted  Boolean        @default(false)
+  aiResponse   String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  user       User          @relation("TicketCreator", fields: [userId], references: [id])
+  assignedTo User?         @relation("TicketAssignee", fields: [assignedToId], references: [id])
+  parent     Parent?       @relation(fields: [parentId], references: [id])
+  replies    TicketReply[]
+}
+
+model TicketReply {
+  id         String   @id @default(cuid())
+  ticketId   String
+  userId     String
+  body       String
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+enum NotificationType {
+  SUB_EXPIRY
+  SESSION_REMINDER
+  MATCH
+  EVENT
+  CANCELLATION
+  PAYMENT_CONFIRM
+  COACH_FEEDBACK
+  GENERAL
+}
+
+enum NotificationChannel {
+  PLATFORM
+  EMAIL
+  WHATSAPP
+}
+
+model Notification {
+  id        String              @id @default(cuid())
+  userId    String
+  type      NotificationType    @default(GENERAL)
+  channel   NotificationChannel @default(PLATFORM)
+  title     String
+  body      String
+  isRead    Boolean             @default(false)
+  sentAt    DateTime?
+  metadata  String?             // JSON string for extra data
+  createdAt DateTime            @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Audit Log ────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String   // e.g. "CREATE_PLAYER", "FREEZE_SUBSCRIPTION"
+  entity    String   // e.g. "Player", "Subscription"
+  entityId  String?
+  details   String?  // JSON string
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
