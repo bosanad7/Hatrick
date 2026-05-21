@@ -57,11 +57,13 @@ export default async function BestPlayersPage({
             id: a.id,
             category: a.category,
             reason: a.reason,
+            achievement: a.achievement,
             player: {
               firstName: a.player.firstName,
               lastName: a.player.lastName,
               ageGroup: a.player.ageGroup,
               playerType: a.player.playerType,
+              photo: a.player.photo,
             },
           }))}
           month={month}

@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
   const userId = (session!.user as { id?: string }).id ?? "";
   const body = await req.json();
-  const { playerId, month, year, category, reason } = body;
+  const { playerId, month, year, category, reason, achievement } = body;
 
   if (!playerId || !month || !year || !category) {
     return NextResponse.json({ error: "playerId, month, year, and category are required" }, { status: 400 });
@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
       year: parseInt(year),
       category,
       reason: reason ?? null,
+      achievement: achievement ?? null,
     },
     include: {
       player: {

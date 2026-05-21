@@ -30,6 +30,7 @@ export function BestPlayerForm({
   const [playerId, setPlayerId] = useState("");
   const [category, setCategory] = useState(categories[0] ?? "");
   const [reason, setReason] = useState("");
+  const [achievement, setAchievement] = useState("");
 
   if (categories.length === 0) return null;
 
@@ -42,12 +43,13 @@ export function BestPlayerForm({
       const res = await fetch("/api/best-players", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerId, month, year, category, reason }),
+        body: JSON.stringify({ playerId, month, year, category, reason, achievement }),
       });
 
       if (res.ok) {
         setPlayerId("");
         setReason("");
+        setAchievement("");
         router.refresh();
       }
     } catch { /* ignore */ }
@@ -115,7 +117,20 @@ export function BestPlayerForm({
             />
           </div>
 
-          <div className="flex items-end">
+          <div>
+            <label className="mb-1 block text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>
+              {t("achievement")}
+            </label>
+            <input
+              value={achievement}
+              onChange={(e) => setAchievement(e.target.value)}
+              placeholder={t("achievement_placeholder")}
+              className="w-full rounded-md border px-3 py-2 text-sm"
+              style={{ background: "var(--muted)", borderColor: "var(--border)", color: "var(--foreground)" }}
+            />
+          </div>
+
+          <div className="flex items-end sm:col-span-2 lg:col-span-1">
             <button
               type="submit"
               disabled={loading || !playerId}

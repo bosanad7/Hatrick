@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Search, CreditCard, Snowflake, XCircle, CheckCircle, Clock } from "lucide-react";
 
 type StatusKey = "ACTIVE" | "EXPIRED" | "FROZEN" | "CANCELLED";
-type TypeKey = "NEW_MEMBERSHIP" | "RENEWAL" | "SINGLE_SESSION" | "TRIAL_SESSION";
+type TypeKey = "NEW_MEMBERSHIP" | "RENEWAL" | "SINGLE_SESSION" | "TRIAL_SESSION" | "FREE_TRIAL";
 
 const statusConfig: Record<StatusKey, { labelKey: TranslationKey; style: string; icon: typeof CheckCircle }> = {
   ACTIVE:    { labelKey: "active",     style: "bg-[rgba(255,255,255,0.1)] text-[#ffffff]",  icon: CheckCircle },
@@ -22,6 +22,7 @@ const typeLabelsMap: Record<TypeKey, TranslationKey> = {
   RENEWAL: "renewal",
   SINGLE_SESSION: "single_session",
   TRIAL_SESSION: "trial_session",
+  FREE_TRIAL: "free_trial",
 };
 
 interface SubData {

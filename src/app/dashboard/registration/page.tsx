@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Role } from "@prisma/client";
 import { RegistrationWizard } from "@/components/registration/registration-wizard";
+import { ShareRegistrationLink } from "@/components/registration/share-link";
 
 export default async function RegistrationPage() {
   const session = await auth();
@@ -14,7 +15,8 @@ export default async function RegistrationPage() {
   return (
     <div className="flex flex-1 flex-col overflow-auto">
       <Header title="Player Registration" subtitle="Register new players with smart pricing" />
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto p-6 space-y-6">
+        <ShareRegistrationLink />
         <RegistrationWizard />
       </div>
     </div>

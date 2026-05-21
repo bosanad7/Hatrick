@@ -1,14 +1,35 @@
 /**
  * Hattrick Heroes — Smart Pricing Engine
  *
- * Pricing tiers:
- *  - 1 player:   72 KWD (normal rate)
- *  - 2-3 players: 60 KWD each (+ free clothing set)
- *  - 4+ players:  50 KWD each (+ free clothing set included)
+ * Subscription Plans:
+ *  - TRAINING_ONLY:     60 KWD (training only)
+ *  - TRAINING_WITH_KIT: 72 KWD (training + shorts, socks, T-shirt)
+ *
+ * Training days: Saturday, Monday, Wednesday
  *
  * Single session: 10 KWD
- * Trial session:  0 KWD (free)
+ * Trial session:  0 KWD (free, one-time per player)
  */
+
+export type SubscriptionPlan = "TRAINING_ONLY" | "TRAINING_WITH_KIT";
+
+export const PLAN_PRICES: Record<SubscriptionPlan, number> = {
+  TRAINING_ONLY: 60,
+  TRAINING_WITH_KIT: 72,
+} as const;
+
+export const PLAN_LABELS: Record<SubscriptionPlan, { en: string; ar: string }> = {
+  TRAINING_ONLY: { en: "Training Only", ar: "تدريب فقط" },
+  TRAINING_WITH_KIT: { en: "Training + Kit", ar: "تدريب + طقم" },
+};
+
+export const KIT_ITEMS = ["T-shirt", "Shorts", "Socks"] as const;
+
+export const TRAINING_DAYS = ["Saturday", "Monday", "Wednesday"] as const;
+export const TRAINING_DAYS_AR = ["السبت", "الإثنين", "الأربعاء"] as const;
+
+export const SINGLE_SESSION_PRICE = 10;
+export const TRIAL_SESSION_PRICE = 0;
 
 export type PricingTier = "STANDARD" | "FAMILY" | "LARGE_FAMILY";
 
@@ -16,29 +37,23 @@ export interface PricingInput {
   /** Total players this parent is registering (across all subs) */
   playerCount: number;
   /** Subscription type for each line */
-  type: "NEW_MEMBERSHIP" | "RENEWAL" | "SINGLE_SESSION" | "TRIAL_SESSION";
+  type: "NEW_MEMBERSHIP" | "RENEWAL" | "SINGLE_SESSION" | "TRIAL_SESSION" | "FREE_TRIAL";
+  /** Subscription plan */
+  plan?: SubscriptionPlan;
   /** Coupon discount (already validated, flat KWD amount off per player) */
   couponDiscount?: number;
 }
 
 export interface PricingResult {
   tier: PricingTier;
+  plan: SubscriptionPlan | null;
   basePrice: number;
   discount: number;
   couponDiscount: number;
   finalPrice: number;
-  freeClothing: boolean;
+  includesKit: boolean;
   currency: "KWD";
 }
-
-const TIER_PRICES = {
-  STANDARD: 72,
-  FAMILY: 60,
-  LARGE_FAMILY: 50,
-} as const;
-
-const SINGLE_SESSION_PRICE = 10;
-const TRIAL_SESSION_PRICE = 0;
 
 /** Determine pricing tier based on total players the parent has */
 export function getTier(playerCount: number): PricingTier {
@@ -47,67 +62,62 @@ export function getTier(playerCount: number): PricingTier {
   return "STANDARD";
 }
 
-/** Get the base price per player for a given tier */
-export function getTierPrice(tier: PricingTier): number {
-  return TIER_PRICES[tier];
-}
-
-/** Check if the tier qualifies for free clothing */
-export function hasFreeClothing(tier: PricingTier): boolean {
-  return tier === "FAMILY" || tier === "LARGE_FAMILY";
+/** Get the base price for a plan */
+export function getPlanPrice(plan: SubscriptionPlan): number {
+  return PLAN_PRICES[plan];
 }
 
 /** Calculate price for a single player subscription */
 export function calculatePlayerPrice(input: PricingInput): PricingResult {
-  const { playerCount, type, couponDiscount = 0 } = input;
+  const { type, plan = "TRAINING_ONLY", couponDiscount = 0 } = input;
 
   // Special subscription types
   if (type === "SINGLE_SESSION") {
     return {
       tier: "STANDARD",
+      plan: null,
       basePrice: SINGLE_SESSION_PRICE,
       discount: 0,
       couponDiscount: Math.min(couponDiscount, SINGLE_SESSION_PRICE),
       finalPrice: Math.max(0, SINGLE_SESSION_PRICE - couponDiscount),
-      freeClothing: false,
+      includesKit: false,
       currency: "KWD",
     };
   }
 
-  if (type === "TRIAL_SESSION") {
+  if (type === "TRIAL_SESSION" || type === "FREE_TRIAL") {
     return {
       tier: "STANDARD",
+      plan: null,
       basePrice: TRIAL_SESSION_PRICE,
       discount: 0,
       couponDiscount: 0,
       finalPrice: 0,
-      freeClothing: false,
+      includesKit: false,
       currency: "KWD",
     };
   }
 
-  // Regular membership pricing
-  const tier = getTier(playerCount);
-  const basePrice = TIER_PRICES.STANDARD; // Always show standard as "base"
-  const tierPrice = getTierPrice(tier);
-  const tierDiscount = basePrice - tierPrice;
-  const effectiveCoupon = Math.min(couponDiscount, tierPrice);
-  const finalPrice = Math.max(0, tierPrice - effectiveCoupon);
+  // Regular membership pricing — based on plan selection
+  const basePrice = getPlanPrice(plan);
+  const effectiveCoupon = Math.min(couponDiscount, basePrice);
+  const finalPrice = Math.max(0, basePrice - effectiveCoupon);
 
   return {
-    tier,
+    tier: "STANDARD",
+    plan,
     basePrice,
-    discount: tierDiscount,
+    discount: 0,
     couponDiscount: effectiveCoupon,
     finalPrice,
-    freeClothing: hasFreeClothing(tier),
+    includesKit: plan === "TRAINING_WITH_KIT",
     currency: "KWD",
   };
 }
 
 /** Calculate total for multiple players under the same parent */
 export function calculateBatchPricing(
-  players: Array<{ type: PricingInput["type"] }>,
+  players: Array<{ type: PricingInput["type"]; plan?: SubscriptionPlan }>,
   couponDiscountPerPlayer = 0
 ): {
   items: PricingResult[];
@@ -115,17 +125,12 @@ export function calculateBatchPricing(
   totalDiscount: number;
   totalCouponDiscount: number;
   grandTotal: number;
-  freeClothing: boolean;
 } {
-  const membershipPlayers = players.filter(
-    (p) => p.type === "NEW_MEMBERSHIP" || p.type === "RENEWAL"
-  );
-  const totalMembership = membershipPlayers.length;
-
   const items = players.map((p) =>
     calculatePlayerPrice({
-      playerCount: totalMembership,
+      playerCount: players.length,
       type: p.type,
+      plan: p.plan,
       couponDiscount: couponDiscountPerPlayer,
     })
   );
@@ -134,9 +139,8 @@ export function calculateBatchPricing(
   const totalDiscount = items.reduce((sum, i) => sum + i.discount, 0);
   const totalCouponDiscount = items.reduce((sum, i) => sum + i.couponDiscount, 0);
   const grandTotal = items.reduce((sum, i) => sum + i.finalPrice, 0);
-  const freeClothing = items.some((i) => i.freeClothing);
 
-  return { items, subtotal, totalDiscount, totalCouponDiscount, grandTotal, freeClothing };
+  return { items, subtotal, totalDiscount, totalCouponDiscount, grandTotal };
 }
 
 /** Validate a coupon and return the per-player discount amount */
@@ -152,6 +156,7 @@ export function applyCoupon(
     isActive: boolean;
   },
   playerCount: number,
+  planPrice: number,
   now = new Date()
 ): { valid: boolean; discountPerPlayer: number; error?: string } {
   if (!coupon.isActive) {
@@ -174,33 +179,42 @@ export function applyCoupon(
     };
   }
 
-  const tier = getTier(playerCount);
-  const tierPrice = getTierPrice(tier);
-
   let discountPerPlayer: number;
   if (coupon.type === "PERCENTAGE") {
-    discountPerPlayer = Math.round((tierPrice * coupon.value) / 100 * 100) / 100;
+    discountPerPlayer = Math.round((planPrice * coupon.value) / 100 * 100) / 100;
   } else {
-    // FIXED: total discount split per player
     discountPerPlayer = Math.round((coupon.value / playerCount) * 100) / 100;
   }
 
   return { valid: true, discountPerPlayer };
 }
 
-/** Human-readable tier label */
-export function tierLabel(tier: PricingTier): string {
-  switch (tier) {
-    case "STANDARD":
-      return "Standard";
-    case "FAMILY":
-      return "Family (2-3 players)";
-    case "LARGE_FAMILY":
-      return "Large Family (4+)";
-  }
+/** Human-readable plan label */
+export function planLabel(plan: SubscriptionPlan | null | undefined, locale: "en" | "ar" = "en"): string {
+  if (!plan) return locale === "ar" ? "—" : "—";
+  return PLAN_LABELS[plan][locale];
 }
 
 /** Format KWD amount */
 export function formatKWD(amount: number): string {
   return `${amount.toFixed(amount % 1 === 0 ? 0 : 2)} KWD`;
 }
+
+/** Get auto age group based on date of birth — Hattrick groups: U6, U8, U11, U14 */
+export function getAutoAgeGroup(dob: string | Date): string {
+  const birth = typeof dob === "string" ? new Date(dob) : dob;
+  if (isNaN(birth.getTime())) return "";
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+
+  if (age < 6) return "U6";
+  if (age < 8) return "U8";
+  if (age < 11) return "U11";
+  if (age < 14) return "U14";
+  return "U14"; // oldest group
+}
+
+/** Training days for the week (0=Sun, 6=Sat) */
+export const TRAINING_DAY_NUMBERS = [6, 1, 3] as const; // Sat, Mon, Wed

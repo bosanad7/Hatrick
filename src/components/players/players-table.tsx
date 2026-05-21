@@ -34,7 +34,9 @@ interface PlayersTableProps {
     position: string | null;
     status: PlayerStatus;
     enrollmentDate: Date;
-    parent: { user: { name: string | null } };
+    photo: string | null;
+    freeTrialUsed: boolean;
+    parent: { user: { name: string | null }; phone: string | null };
   }>;
   searchParams: { search?: string; ageGroup?: string; status?: string };
   ageGroups: string[];
@@ -103,6 +105,7 @@ export function PlayersTable({ players, searchParams, ageGroups, playerStatuses 
                   <th className="px-4 py-3">{t("age")}</th>
                   <th className="px-4 py-3">{t("position")}</th>
                   <th className="px-4 py-3">{t("parent_name")}</th>
+                  <th className="px-4 py-3">{t("parent_phone")}</th>
                   <th className="px-4 py-3">{t("status")}</th>
                   <th className="px-4 py-3">{t("enrollment_date")}</th>
                   <th className="px-4 py-3"></th>
@@ -111,7 +114,7 @@ export function PlayersTable({ players, searchParams, ageGroups, playerStatuses 
               <tbody className="divide-y divide-[var(--border)]">
                 {players.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center text-[var(--muted-foreground)]">
+                    <td colSpan={9} className="px-4 py-12 text-center text-[var(--muted-foreground)]">
                       {t("no_players_found")}
                     </td>
                   </tr>
@@ -120,9 +123,13 @@ export function PlayersTable({ players, searchParams, ageGroups, playerStatuses 
                     <tr key={player.id} className="hover:bg-[rgba(255,255,255,0.02)] transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primary)] text-xs font-bold text-white">
-                            {player.firstName.charAt(0)}{player.lastName.charAt(0)}
-                          </div>
+                          {player.photo ? (
+                            <img src={player.photo} alt="" className="h-8 w-8 rounded-full object-cover" />
+                          ) : (
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primary)] text-xs font-bold text-white">
+                              {player.firstName.charAt(0)}{player.lastName.charAt(0)}
+                            </div>
+                          )}
                           <div>
                             <p className="font-medium text-[var(--foreground)]">
                               {player.firstName} {player.lastName}
@@ -145,10 +152,20 @@ export function PlayersTable({ players, searchParams, ageGroups, playerStatuses 
                       <td className="px-4 py-3 text-[var(--muted-foreground)]">
                         {player.parent.user.name ?? "—"}
                       </td>
+                      <td className="px-4 py-3 text-[var(--muted-foreground)]" dir="ltr">
+                        {player.parent.phone ?? "—"}
+                      </td>
                       <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
                         <Badge variant={statusColors[player.status] as "default" | "secondary" | "destructive" | "warning" | "outline"}>
                           {t(statusKeys[player.status] as "active" | "inactive" | "waitlist" | "suspended")}
                         </Badge>
+                        {player.freeTrialUsed && (
+                          <span className="rounded px-1 py-0.5 text-[10px]" style={{ background: "rgba(255,255,255,0.06)", color: "var(--muted-foreground)" }}>
+                            Trial
+                          </span>
+                        )}
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-[var(--muted-foreground)]">
                         {formatDate(player.enrollmentDate)}

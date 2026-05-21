@@ -60,11 +60,42 @@ export async function PATCH(
       if (sub.status !== "ACTIVE") {
         return NextResponse.json({ error: "Can only freeze active subscriptions" }, { status: 400 });
       }
+
+      const { freezeStartDate, freezeEndDate, freezeReason } = body;
+      if (!freezeStartDate || !freezeEndDate) {
+        return NextResponse.json({ error: "Freeze start and end dates are required" }, { status: 400 });
+      }
+
+      const start = new Date(freezeStartDate);
+      const end = new Date(freezeEndDate);
+      const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+
+      // Max 90 days (3 months) freeze
+      if (diffDays > 90) {
+        return NextResponse.json({ error: "Maximum freeze duration is 3 months (90 days)" }, { status: 400 });
+      }
+      if (diffDays <= 0) {
+        return NextResponse.json({ error: "End date must be after start date" }, { status: 400 });
+      }
+
       const updated = await db.subscription.update({
         where: { id },
-        data: { status: SubscriptionStatus.FROZEN },
+        data: {
+          status: SubscriptionStatus.FROZEN,
+          freezeStartDate: start,
+          freezeEndDate: end,
+          freezeReason: freezeReason || null,
+          totalFreezeDays: { increment: diffDays },
+        },
       });
-      await logAudit({ userId, action: "FREEZE_SUBSCRIPTION", entity: "Subscription", entityId: id });
+
+      await logAudit({
+        userId,
+        action: "FREEZE_SUBSCRIPTION",
+        entity: "Subscription",
+        entityId: id,
+        details: { freezeStartDate, freezeEndDate, freezeReason, days: diffDays },
+      });
       return NextResponse.json(updated);
     }
 
@@ -72,11 +103,32 @@ export async function PATCH(
       if (sub.status !== "FROZEN") {
         return NextResponse.json({ error: "Subscription is not frozen" }, { status: 400 });
       }
+
+      // Extend end date by the freeze duration
+      const freezeDays = sub.freezeStartDate && sub.freezeEndDate
+        ? Math.ceil((sub.freezeEndDate.getTime() - sub.freezeStartDate.getTime()) / (1000 * 60 * 60 * 24))
+        : 0;
+
+      const newEndDate = new Date(sub.endDate);
+      newEndDate.setDate(newEndDate.getDate() + freezeDays);
+
       const updated = await db.subscription.update({
         where: { id },
-        data: { status: SubscriptionStatus.ACTIVE },
+        data: {
+          status: SubscriptionStatus.ACTIVE,
+          endDate: newEndDate,
+          freezeStartDate: null,
+          freezeEndDate: null,
+        },
       });
-      await logAudit({ userId, action: "UNFREEZE_SUBSCRIPTION", entity: "Subscription", entityId: id });
+
+      await logAudit({
+        userId,
+        action: "UNFREEZE_SUBSCRIPTION",
+        entity: "Subscription",
+        entityId: id,
+        details: { freezeDays, newEndDate },
+      });
       return NextResponse.json(updated);
     }
 
@@ -103,6 +155,7 @@ export async function PATCH(
             : undefined,
         },
       });
+      await logAudit({ userId, action: "EXTEND_SUBSCRIPTION", entity: "Subscription", entityId: id, details: body });
       return NextResponse.json(updated);
     }
 

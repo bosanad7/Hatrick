@@ -3,17 +3,19 @@
 import { useTranslation } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Star } from "lucide-react";
+import { Trophy, Star, User } from "lucide-react";
 
 interface Award {
   id: string;
   category: string;
   reason: string | null;
+  achievement: string | null;
   player: {
     firstName: string;
     lastName: string;
     ageGroup: string;
     playerType: string;
+    photo: string | null;
   };
 }
 
@@ -29,6 +31,11 @@ export function BestPlayersContent({ awards, month, year, monthNames }: BestPlay
 
   return (
     <>
+      {/* Info */}
+      <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+        {t("best_players_subtitle")}
+      </p>
+
       {/* Month selector */}
       <Card>
         <CardContent className="p-4">
@@ -66,37 +73,57 @@ export function BestPlayersContent({ awards, month, year, monthNames }: BestPlay
 
       {/* Current awards */}
       {awards.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           {awards.map((award) => (
             <Card key={award.id}>
               <CardContent className="p-5">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="flex h-10 w-10 items-center justify-center rounded-lg"
-                      style={{ background: "rgba(255,255,255,0.08)" }}
-                    >
-                      <Trophy className="h-5 w-5" style={{ color: "#fbbf24" }} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
-                        {award.player.firstName} {award.player.lastName}
-                      </p>
-                      <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                        {award.player.ageGroup} · {award.player.playerType}
-                      </p>
-                    </div>
+                <div className="flex items-start gap-4">
+                  {/* Player photo */}
+                  <div className="flex-shrink-0">
+                    {award.player.photo ? (
+                      <img
+                        src={award.player.photo}
+                        alt={`${award.player.firstName} ${award.player.lastName}`}
+                        className="h-14 w-14 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+                        <User className="h-6 w-6" style={{ color: "var(--muted-foreground)" }} />
+                      </div>
+                    )}
                   </div>
-                  <Star className="h-4 w-4" style={{ color: "#fbbf24" }} />
+
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
+                          {award.player.firstName} {award.player.lastName}
+                        </p>
+                        <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+                          {award.player.ageGroup} · {award.player.playerType}
+                        </p>
+                      </div>
+                      <Trophy className="h-5 w-5 flex-shrink-0" style={{ color: "#fbbf24" }} />
+                    </div>
+
+                    <div className="mt-2 flex items-center gap-2">
+                      <Badge variant="outline">{award.category}</Badge>
+                      <Star className="h-3 w-3" style={{ color: "#fbbf24" }} />
+                    </div>
+
+                    {award.achievement && (
+                      <p className="mt-2 text-xs italic" style={{ color: "var(--foreground)" }}>
+                        &ldquo;{award.achievement}&rdquo;
+                      </p>
+                    )}
+
+                    {award.reason && (
+                      <p className="mt-1 text-xs" style={{ color: "var(--muted-foreground)" }}>
+                        {award.reason}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div className="mt-3">
-                  <Badge variant="outline">{award.category}</Badge>
-                </div>
-                {award.reason && (
-                  <p className="mt-2 text-xs" style={{ color: "var(--muted-foreground)" }}>
-                    {award.reason}
-                  </p>
-                )}
               </CardContent>
             </Card>
           ))}

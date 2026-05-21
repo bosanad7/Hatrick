@@ -131,7 +131,7 @@ async function main() {
       lastName: "Al-Rashidi",
       dateOfBirth: new Date("2017-08-20"),
       gender: Gender.MALE,
-      ageGroup: AgeGroup.U9,
+      ageGroup: AgeGroup.U8,
       playerType: "GOALKEEPER",
       position: "Goalkeeper",
       jerseyNumber: 1,
@@ -143,7 +143,7 @@ async function main() {
       preferredShirtNumber: 1,
     },
   });
-  console.log("✅ Players:     Omar (U11) + Yousef (U9, GK)");
+  console.log("✅ Players:     Omar (U11) + Yousef (U8, GK)");
 
   // ── 7. Demo groups ────────────────────────────────────────────────────────
   const group = await db.group.upsert({
@@ -163,8 +163,8 @@ async function main() {
     update: {},
     create: {
       id: "demo-group-002",
-      name: "Falcons U9",
-      ageGroup: AgeGroup.U9,
+      name: "Falcons U8",
+      ageGroup: AgeGroup.U8,
       maxCapacity: 14,
       description: "Under-9 beginner squad",
     },
@@ -181,7 +181,7 @@ async function main() {
     update: {},
     create: { groupId: groupU9.id, playerId: player2.id },
   });
-  console.log("✅ Groups:      Eagles U11, Falcons U9");
+  console.log("✅ Groups:      Eagles U11, Falcons U8");
 
   // ── 8. Demo training sessions ─────────────────────────────────────────────
   const tomorrow = new Date();

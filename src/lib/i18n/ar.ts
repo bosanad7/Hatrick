@@ -506,6 +506,87 @@ export const ar: Record<TranslationKey, string> = {
   ai_draft_announcement: "مسودة إعلان",
   ai_features: "تحليل بيانات مباشر,تحليل المدفوعات,تتبع الحضور,مراقبة الاشتراكات,تحليلات الدعم,إنشاء التقارير,صياغة الإعلانات",
 
+  // ── Training Schedule ──────────────────────────────────────────────────────
+  training_days: "أيام التدريب",
+  training_days_value: "السبت، الإثنين، الأربعاء",
+  sat: "السبت",
+  mon: "الإثنين",
+  wed: "الأربعاء",
+
+  // ── Subscription Plans ────────────────────────────────────────────────────
+  plan_training_only: "تدريب فقط",
+  plan_training_with_kit: "تدريب + طقم",
+  plan_training_only_desc: "٦٠ د.ك — حصص تدريبية فقط",
+  plan_training_with_kit_desc: "٧٢ د.ك — تدريب + شورت وجوارب وتيشيرت",
+  select_plan: "اختر الخطة",
+  kit_includes: "الطقم يشمل: شورت، جوارب، وتيشيرت",
+  plan: "الخطة",
+
+  // ── Free Trial ────────────────────────────────────────────────────────────
+  free_trial: "تجربة مجانية",
+  free_trial_desc: "حصة تجريبية مجانية لمرة واحدة لكل لاعب",
+  free_trial_used: "تم استخدام التجربة",
+  free_trial_available: "التجربة متاحة",
+  free_trial_one_time: "يمكن استخدام هذه التجربة المجانية مرة واحدة فقط لكل لاعب",
+  trial_already_used: "هذا اللاعب استخدم تجربته المجانية بالفعل",
+
+  // ── Subscription Freeze ───────────────────────────────────────────────────
+  freeze_subscription: "تجميد الاشتراك",
+  freeze_start: "تاريخ بدء التجميد",
+  freeze_end: "تاريخ انتهاء التجميد",
+  freeze_reason: "سبب التجميد",
+  freeze_reason_placeholder: "مثال: سفر صيفي، إجازة عائلية",
+  freeze_max: "أقصى مدة تجميد: ٣ أشهر",
+  remaining_period: "المدة المتبقية",
+  freeze_days: "أيام التجميد",
+  freeze_active: "التجميد نشط",
+  freeze_history: "سجل التجميد",
+  unfreeze_confirm: "هل أنت متأكد من إلغاء تجميد هذا الاشتراك؟",
+
+  // ── Payment Gateway ───────────────────────────────────────────────────────
+  pay_now: "ادفع الآن",
+  payment_processing: "جارِ معالجة الدفع…",
+  payment_success: "تم الدفع بنجاح!",
+  payment_failed: "فشل الدفع. يرجى المحاولة مرة أخرى.",
+  payment_ref: "مرجع الدفع",
+  payment_method: "طريقة الدفع",
+  pay_with_myfatoorah: "الدفع عبر ماي فاتورة",
+  invoice_id: "رقم الفاتورة",
+
+  // ── Public Registration ───────────────────────────────────────────────────
+  public_registration: "تسجيل اللاعب",
+  public_reg_subtitle: "سجّل طفلك في أكاديمية هاتريك هيروز",
+  public_reg_success: "تم إرسال التسجيل! ستتلقى تأكيداً قريباً.",
+  share_registration: "مشاركة رابط التسجيل",
+  copy_link: "نسخ الرابط",
+  link_copied: "تم نسخ الرابط!",
+  register_via_whatsapp: "التسجيل عبر واتساب",
+  whatsapp_share_text: "سجّل طفلك في أكاديمية هاتريك هيروز:",
+
+  // ── Civil ID ──────────────────────────────────────────────────────────────
+  civil_id: "البطاقة المدنية",
+  upload_civil_id: "تحميل البطاقة المدنية",
+  civil_id_number: "رقم البطاقة المدنية",
+  civil_id_name: "الاسم في البطاقة المدنية",
+  civil_id_dob: "تاريخ الميلاد في البطاقة المدنية",
+  civil_id_nationality: "الجنسية",
+  civil_id_processing: "جارِ معالجة البطاقة المدنية…",
+  civil_id_confirm: "يرجى التحقق من المعلومات المستخرجة",
+  civil_id_manual: "الإدخال يدوياً",
+  civil_id_upload_hint: "تحميل الوجه الأمامي للبطاقة المدنية",
+
+  // ── Best Players Enhanced ─────────────────────────────────────────────────
+  achievement: "الإنجاز",
+  achievement_placeholder: "أداء متميز هذا الشهر…",
+  best_players_subtitle: "تختار الأكاديمية ٤ أفضل لاعبين كل شهر",
+  player_photo: "صورة اللاعب",
+
+  // ── Coach Search ──────────────────────────────────────────────────────────
+  search_all_players: "البحث في جميع اللاعبين…",
+  subscription_status: "حالة الاشتراك",
+  contact_info: "معلومات الاتصال",
+  parent_phone: "هاتف ولي الأمر",
+
   // ── Time ──────────────────────────────────────────────────────────────────
   just_now: "الآن",
   minutes_ago: "منذ {n} دقيقة",

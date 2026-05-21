@@ -79,12 +79,10 @@ model VerificationToken {
 // ─── Academy Core ─────────────────────────────────────────────────────────────
 
 enum AgeGroup {
-  U5
-  U7
-  U9
+  U6
+  U8
   U11
-  U13
-  U15
+  U14
 }
 
 enum PlayerStatus {
@@ -148,6 +146,8 @@ model Player {
   preferredShirtNumber Int?
   // Trial tracking
   hasPreviousTrial     Boolean      @default(false)
+  freeTrialUsed        Boolean      @default(false)
+  freeTrialDate        DateTime?
   // Admin override for category
   ageGroupOverride     Boolean      @default(false)
   ageGroupOverrideNote String?
@@ -366,26 +366,75 @@ model PlayerCard {
 // ─── Best Player of the Month ─────────────────────────────────────────────────
 
 model BestPlayerOfMonth {
-  id        String   @id @default(cuid())
-  playerId  String
-  month     Int
-  year      Int
-  category  String   // e.g. "Best Attacker", "Best Defender", "MVP"
-  reason    String?
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  playerId    String
+  month       Int
+  year        Int
+  category    String   // e.g. "Best Attacker", "Best Defender", "MVP"
+  reason      String?
+  achievement String?  // Optional comment / achievement description
+  createdAt   DateTime @default(now())
 
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@unique([playerId, month, year, category])
 }
 
+// ─── Public Registration (WhatsApp link) ──────────────────────────────────────
+
+model PublicRegistration {
+  id              String   @id @default(cuid())
+  // Parent info
+  parentName      String
+  parentEmail     String
+  parentPhone     String
+  parentAddress   String?
+  // Player info
+  playerFirstName String
+  playerLastName  String
+  playerDob       DateTime
+  playerGender    Gender   @default(MALE)
+  playerType      PlayerType @default(OUTFIELD)
+  ageGroup        AgeGroup
+  // Subscription
+  plan            SubscriptionPlan @default(TRAINING_ONLY)
+  amount          Float
+  couponCode      String?
+  discount        Float    @default(0)
+  // Civil ID
+  civilIdImage    String?
+  civilIdNumber   String?
+  civilIdName     String?
+  civilIdDob      DateTime?
+  civilIdNationality String?
+  civilIdConfirmed Boolean @default(false)
+  // Status
+  status          String   @default("PENDING") // PENDING, PAID, COMPLETED, FAILED
+  // MyFatoorah
+  mfPaymentId     String?
+  mfPaymentRef    String?
+  mfPaymentStatus String?
+  mfInvoiceUrl    String?
+  // Tracking
+  playerId        String?  // filled after completion
+  subscriptionId  String?  // filled after completion
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 // ─── Subscriptions ────────────────────────────────────────────────────────────
+
+enum SubscriptionPlan {
+  TRAINING_ONLY      // 60 KWD — training only
+  TRAINING_WITH_KIT  // 72 KWD — training + shorts, socks, T-shirt
+}
 
 enum SubscriptionType {
   NEW_MEMBERSHIP
   RENEWAL
   SINGLE_SESSION
   TRIAL_SESSION
+  FREE_TRIAL
 }
 
 enum SubscriptionStatus {
@@ -400,6 +449,7 @@ model Subscription {
   playerId           String
   parentId           String
   type               SubscriptionType
+  plan               SubscriptionPlan?  // TRAINING_ONLY (60) or TRAINING_WITH_KIT (72)
   status             SubscriptionStatus @default(ACTIVE)
   startDate          DateTime
   endDate            DateTime
@@ -412,6 +462,17 @@ model Subscription {
   couponId           String?
   loyaltyBenefitApplied Boolean         @default(false)
   paymentId          String?
+  // Freeze / Postpone
+  freezeStartDate    DateTime?
+  freezeEndDate      DateTime?
+  freezeReason       String?
+  totalFreezeDays    Int                @default(0)
+  // MyFatoorah payment
+  mfPaymentId        String?            // MyFatoorah InvoiceId
+  mfPaymentRef       String?            // MyFatoorah PaymentId reference
+  mfPaymentStatus    String?            // e.g. "Paid", "Pending", "Failed"
+  mfPaymentDate      DateTime?
+  mfInvoiceUrl       String?            // MyFatoorah payment link
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 

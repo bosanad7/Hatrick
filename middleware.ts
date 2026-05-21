@@ -93,4 +93,5 @@ export default auth((req) => {
 
 export const config = {
   matcher: ["/dashboard/:path*", "/login"],
+  // Note: /register and /api/register/public are NOT protected — public access for WhatsApp registration
 };

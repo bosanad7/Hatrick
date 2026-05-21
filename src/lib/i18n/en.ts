@@ -504,6 +504,87 @@ export const en = {
   ai_draft_announcement: "Draft announcement",
   ai_features: "Live data analysis,Payment insights,Attendance tracking,Subscription monitoring,Support analytics,Report generation,Announcement drafting",
 
+  // ── Training Schedule ──────────────────────────────────────────────────────
+  training_days: "Training Days",
+  training_days_value: "Saturday, Monday, Wednesday",
+  sat: "Saturday",
+  mon: "Monday",
+  wed: "Wednesday",
+
+  // ── Subscription Plans ────────────────────────────────────────────────────
+  plan_training_only: "Training Only",
+  plan_training_with_kit: "Training + Kit",
+  plan_training_only_desc: "60 KWD — Training sessions only",
+  plan_training_with_kit_desc: "72 KWD — Training + shorts, socks & T-shirt",
+  select_plan: "Select Plan",
+  kit_includes: "Kit includes: shorts, socks, and T-shirt",
+  plan: "Plan",
+
+  // ── Free Trial ────────────────────────────────────────────────────────────
+  free_trial: "Free Trial",
+  free_trial_desc: "One-time free trial session per player",
+  free_trial_used: "Trial Used",
+  free_trial_available: "Trial Available",
+  free_trial_one_time: "This free trial can only be used once per player",
+  trial_already_used: "This player has already used their free trial",
+
+  // ── Subscription Freeze ───────────────────────────────────────────────────
+  freeze_subscription: "Freeze Subscription",
+  freeze_start: "Freeze Start Date",
+  freeze_end: "Freeze End Date",
+  freeze_reason: "Reason for Freeze",
+  freeze_reason_placeholder: "e.g. Summer travel, family vacation",
+  freeze_max: "Maximum freeze: 3 months",
+  remaining_period: "Remaining Period",
+  freeze_days: "Freeze Days",
+  freeze_active: "Freeze Active",
+  freeze_history: "Freeze History",
+  unfreeze_confirm: "Are you sure you want to unfreeze this subscription?",
+
+  // ── Payment Gateway ───────────────────────────────────────────────────────
+  pay_now: "Pay Now",
+  payment_processing: "Processing payment…",
+  payment_success: "Payment successful!",
+  payment_failed: "Payment failed. Please try again.",
+  payment_ref: "Payment Reference",
+  payment_method: "Payment Method",
+  pay_with_myfatoorah: "Pay with MyFatoorah",
+  invoice_id: "Invoice ID",
+
+  // ── Public Registration ───────────────────────────────────────────────────
+  public_registration: "Player Registration",
+  public_reg_subtitle: "Register your child at Hattrick Heroes Academy",
+  public_reg_success: "Registration submitted! You will receive a confirmation shortly.",
+  share_registration: "Share Registration Link",
+  copy_link: "Copy Link",
+  link_copied: "Link copied!",
+  register_via_whatsapp: "Register via WhatsApp",
+  whatsapp_share_text: "Register your child at Hattrick Heroes Academy:",
+
+  // ── Civil ID ──────────────────────────────────────────────────────────────
+  civil_id: "Civil ID",
+  upload_civil_id: "Upload Civil ID",
+  civil_id_number: "Civil ID Number",
+  civil_id_name: "Name on Civil ID",
+  civil_id_dob: "Date of Birth on Civil ID",
+  civil_id_nationality: "Nationality",
+  civil_id_processing: "Processing civil ID…",
+  civil_id_confirm: "Please verify the extracted information",
+  civil_id_manual: "Enter manually",
+  civil_id_upload_hint: "Upload front side of civil ID card",
+
+  // ── Best Players Enhanced ─────────────────────────────────────────────────
+  achievement: "Achievement",
+  achievement_placeholder: "Outstanding performance this month…",
+  best_players_subtitle: "Academy selects 4 best players each month",
+  player_photo: "Player Photo",
+
+  // ── Coach Search ──────────────────────────────────────────────────────────
+  search_all_players: "Search all players…",
+  subscription_status: "Subscription Status",
+  contact_info: "Contact Info",
+  parent_phone: "Parent Phone",
+
   // ── Time ──────────────────────────────────────────────────────────────────
   just_now: "just now",
   minutes_ago: "{n}m ago",
