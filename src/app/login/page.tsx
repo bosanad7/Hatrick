@@ -13,7 +13,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { t, dir } = useTranslation();
   const isRTL = dir === "rtl";
-  const [email, setEmail]       = useState("admin@hattrick.com.kw");
+  const [email, setEmail]       = useState("admin@hattrick.kw");
   const [password, setPassword] = useState("admin123");
   const [showPass, setShowPass] = useState(false);
   const [error, setError]       = useState("");
