@@ -127,7 +127,11 @@ export function RegistrationWizard() {
 
     try {
       const parentRes = await fetch("/api/players", { method: "GET" });
-      if (!parentRes.ok) { setError("Authentication error. Please refresh."); return; }
+      if (!parentRes.ok) {
+        const errData = await parentRes.json().catch(() => ({}));
+        setError(errData.error || (parentRes.status === 401 ? "Please log in and try again." : "Server error. Please try again."));
+        return;
+      }
 
       for (let i = 0; i < players.length; i++) {
         const p = players[i];

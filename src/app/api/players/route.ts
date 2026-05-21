@@ -26,10 +26,57 @@ export async function POST(req: NextRequest) {
     jerseyNumber,
     medicalNotes,
     parentId,
+    playerType,
+    clothingSize,
+    preferredShirtName,
+    preferredShirtNumber,
+    freeTrialUsed,
+    // Registration wizard fields for parent lookup/creation
+    parentEmail,
+    parentName,
+    parentPhone,
+    parentAddress,
   } = body;
 
-  if (!firstName || !lastName || !dateOfBirth || !ageGroup || !parentId) {
+  if (!firstName || !lastName || !dateOfBirth || !ageGroup) {
     return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
+  }
+
+  // Resolve parentId — either provided directly or look up / create from email
+  let resolvedParentId = parentId;
+
+  if (parentId === "LOOKUP" && parentEmail) {
+    // Find or create parent by email
+    let user = await db.user.findUnique({ where: { email: parentEmail } });
+    if (!user) {
+      const bcrypt = await import("bcryptjs");
+      const tempPassword = await bcrypt.hash(`hattrick${Date.now()}`, 10);
+      user = await db.user.create({
+        data: {
+          email: parentEmail,
+          name: parentName || parentEmail,
+          phone: parentPhone || null,
+          password: tempPassword,
+          role: "PARENT",
+        },
+      });
+    }
+
+    let parent = await db.parent.findUnique({ where: { userId: user.id } });
+    if (!parent) {
+      parent = await db.parent.create({
+        data: {
+          userId: user.id,
+          phone: parentPhone || null,
+          address: parentAddress || null,
+        },
+      });
+    }
+    resolvedParentId = parent.id;
+  }
+
+  if (!resolvedParentId) {
+    return NextResponse.json({ error: "Parent ID is required." }, { status: 400 });
   }
 
   const player = await db.player.create({
@@ -39,15 +86,21 @@ export async function POST(req: NextRequest) {
       dateOfBirth: new Date(dateOfBirth),
       gender: (gender as Gender) ?? "MALE",
       ageGroup: ageGroup as AgeGroup,
+      playerType: playerType || "OUTFIELD",
       nationality: nationality || null,
       position: position || null,
-      jerseyNumber: jerseyNumber ? parseInt(jerseyNumber) : null,
+      jerseyNumber: jerseyNumber ? parseInt(String(jerseyNumber)) : null,
       medicalNotes: medicalNotes || null,
-      parentId,
+      parentId: resolvedParentId,
+      clothingSize: clothingSize || null,
+      preferredShirtName: preferredShirtName || null,
+      preferredShirtNumber: preferredShirtNumber ? parseInt(String(preferredShirtNumber)) : null,
+      freeTrialUsed: freeTrialUsed === true,
+      freeTrialDate: freeTrialUsed ? new Date() : null,
     },
   });
 
-  return NextResponse.json(player, { status: 201 });
+  return NextResponse.json({ ...player, parentId: resolvedParentId }, { status: 201 });
 }
 
 export async function GET() {
