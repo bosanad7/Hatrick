@@ -79,10 +79,15 @@ model VerificationToken {
 // ─── Academy Core ─────────────────────────────────────────────────────────────
 
 enum AgeGroup {
+  U5
   U6
+  U7
   U8
+  U9
   U11
+  U13
   U14
+  U15
 }
 
 enum PlayerStatus {
