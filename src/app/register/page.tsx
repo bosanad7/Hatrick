@@ -7,6 +7,7 @@ import {
   User, Shield, CreditCard, Check, ChevronRight, ChevronLeft,
   Loader2, Upload, Phone, FileText,
 } from "lucide-react";
+import { CivilIdReader } from "@/components/registration/civil-id-reader";
 import { formatKWD, PLAN_PRICES, getAutoAgeGroup, TRAINING_DAYS, KIT_ITEMS } from "@/lib/pricing";
 
 type Plan = "TRAINING_ONLY" | "TRAINING_WITH_KIT";
@@ -234,18 +235,29 @@ export default function PublicRegistrationPage() {
                     options={[{ value: "OUTFIELD", label: isAr ? "لاعب ميداني" : "Outfield" }, { value: "GOALKEEPER", label: isAr ? "حارس مرمى" : "Goalkeeper" }]} />
                 </div>
 
-                {/* Civil ID Section */}
-                <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                  <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                    <FileText className="h-4 w-4" /> {isAr ? "البطاقة المدنية (اختياري)" : "Civil ID (Optional)"}
-                  </h3>
-                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-                    {isAr ? "أدخل معلومات البطاقة المدنية يدوياً" : "Enter civil ID information manually"}
-                  </p>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <InputField label={isAr ? "رقم البطاقة المدنية" : "Civil ID Number"} value={civilIdNumber} onChange={setCivilIdNumber} placeholder="2XXXXXXXXXXX" dir="ltr" />
-                    <InputField label={isAr ? "الاسم في البطاقة" : "Name on Civil ID"} value={civilIdName} onChange={setCivilIdName} />
-                    <InputField label={isAr ? "الجنسية" : "Nationality"} value={civilIdNationality} onChange={setCivilIdNationality} placeholder={isAr ? "كويتي" : "Kuwaiti"} />
+                {/* Civil ID Section — OCR Upload + Manual */}
+                <div className="border-t pt-4 mt-4 space-y-4" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                  {/* OCR Reader */}
+                  <CivilIdReader
+                    lang={lang}
+                    onDataExtracted={(data) => {
+                      if (data.civilIdNumber) setCivilIdNumber(data.civilIdNumber);
+                      if (data.civilIdName) setCivilIdName(data.civilIdName);
+                      if (data.civilIdNationality) setCivilIdNationality(data.civilIdNationality);
+                      if (data.civilIdDob && !dob) setDob(data.civilIdDob);
+                    }}
+                  />
+
+                  {/* Manual fields (pre-filled by OCR or editable) */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>
+                      {isAr ? "أو أدخل البيانات يدوياً" : "Or enter manually / edit extracted data"}
+                    </p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <InputField label={isAr ? "رقم البطاقة المدنية" : "Civil ID Number"} value={civilIdNumber} onChange={setCivilIdNumber} placeholder="2XXXXXXXXXXX" dir="ltr" />
+                      <InputField label={isAr ? "الاسم في البطاقة" : "Name on Civil ID"} value={civilIdName} onChange={setCivilIdName} />
+                      <InputField label={isAr ? "الجنسية" : "Nationality"} value={civilIdNationality} onChange={setCivilIdNationality} placeholder={isAr ? "كويتي" : "Kuwaiti"} />
+                    </div>
                   </div>
                 </div>
               </div>
