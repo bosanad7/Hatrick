@@ -115,6 +115,7 @@ export function CivilIdReader({ onDataExtracted, lang = "en" }: CivilIdReaderPro
   const [result, setResult] = useState<CivilIdData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const isAr = lang === "ar";
 
   async function handleFileSelect(file: File) {
@@ -174,6 +175,7 @@ export function CivilIdReader({ onDataExtracted, lang = "en" }: CivilIdReaderPro
     setError(null);
     setProgress(0);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
   }
 
   return (
@@ -189,24 +191,53 @@ export function CivilIdReader({ onDataExtracted, lang = "en" }: CivilIdReaderPro
       </p>
 
       {!image ? (
-        <div
-          onDrop={handleDrop}
-          onDragOver={(e) => e.preventDefault()}
-          onClick={() => fileInputRef.current?.click()}
-          className="flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-8 cursor-pointer transition-all hover:border-white/30"
-          style={{ borderColor: "rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.02)" }}
-        >
-          <Upload className="h-8 w-8" style={{ color: "rgba(255,255,255,0.3)" }} />
-          <div className="text-center">
-            <p className="text-sm font-medium text-white">
-              {isAr ? "اسحب الصورة هنا أو اضغط للاختيار" : "Drag & drop or click to upload"}
-            </p>
-            <p className="mt-1 text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-              {isAr ? "PNG, JPG, HEIC" : "PNG, JPG, HEIC"}
-            </p>
+        <div className="space-y-3">
+          {/* Two buttons: Upload from gallery OR Take photo */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Upload from photos/gallery */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-6 cursor-pointer transition-all hover:border-white/30"
+              style={{ borderColor: "rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.02)" }}
+            >
+              <Upload className="h-6 w-6" style={{ color: "rgba(255,255,255,0.4)" }} />
+              <span className="text-xs font-medium text-white">
+                {isAr ? "اختر من الصور" : "Choose from Photos"}
+              </span>
+            </button>
+
+            {/* Take new photo with camera */}
+            <button
+              onClick={() => cameraInputRef.current?.click()}
+              className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-6 cursor-pointer transition-all hover:border-white/30"
+              style={{ borderColor: "rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.02)" }}
+            >
+              <Camera className="h-6 w-6" style={{ color: "rgba(255,255,255,0.4)" }} />
+              <span className="text-xs font-medium text-white">
+                {isAr ? "التقط صورة" : "Take Photo"}
+              </span>
+            </button>
           </div>
+
+          <p className="text-center text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+            {isAr ? "PNG, JPG, HEIC" : "PNG, JPG, HEIC"}
+          </p>
+
+          {/* Hidden file input — gallery/photos (NO capture attribute) */}
           <input
             ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleFileSelect(file);
+            }}
+          />
+
+          {/* Hidden file input — camera only */}
+          <input
+            ref={cameraInputRef}
             type="file"
             accept="image/*"
             capture="environment"
